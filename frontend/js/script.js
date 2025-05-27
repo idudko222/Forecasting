@@ -1,6 +1,119 @@
 let currentRequest = null; // Для хранения текущего AJAX-запроса
 let lastRequestTime = 0; // Для защиты от частых запросов
 
+const supportedRegions = [
+    'Санкт-Петербург',
+    'Ленинградская область',
+    'Москва',
+    'Московская область',
+    'Краснодарский край',
+    'Нижегородская область',
+    'Ростовская область',
+    'Самарская область',
+    'Республика Татарстан',
+    'Ставропольский край',
+    'Республика Башкортостан',
+    'Свердловская область',
+    'Республика Коми',
+    'Челябинская область',
+    'Иркутская область',
+    'Пермский край',
+    'Алтайский край',
+    'Республика Бурятия',
+    'Ярославская область',
+    'Удмуртская Республика',
+    'Псковская область',
+    'Республика Северная Осетия — Алания',
+    'Кемеровская область',
+    'Чувашская Республика',
+    'Республика Марий Эл',
+    'Кабардино-Балкарская Республика',
+    'Республика Мордовия',
+    'Красноярский край',
+    'Тюменская область',
+    'Республика Хакасия',
+    'Новосибирская область',
+    'Воронежская область',
+    'Республика Карелия',
+    'Республика Дагестан',
+    'Республика Саха (Якутия)',
+    'Забайкальский край',
+    'Республика Крым',
+    'Кировская область',
+    'Республика Калмыкия',
+    'Республика Адыгея',
+    'Карачаево-Черкесская Республика',
+    'Республика Тыва',
+    'Республика Ингушетия',
+    'Республика Алтай',
+    'Белгородская область',
+    'Архангельская область',
+    'Тверская область',
+    'Пензенская область',
+    'Ханты-Мансийский автономный округ',
+    'Липецкая область',
+    'Владимирская область',
+    'Ямало-Ненецкий автономный округ',
+    'Рязанская область',
+    'Чеченская Республика',
+    'Смоленская область',
+    'Саратовская область',
+    'Вологодская область',
+    'Волгоградская область',
+    'Калужская область',
+    'Тульская область',
+    'Тамбовская область',
+    'Мурманская область',
+    'Новгородская область',
+    'Курская область',
+    'Хабаровский край',
+    'Брянская область',
+    'Астраханская область',
+    'Калининградская область',
+    'Омская область',
+    'Курганская область',
+    'Томская область',
+    'Ульяновская область',
+    'Оренбургская область',
+    'Костромская область',
+    'Орловская область',
+    'Камчатский край',
+    'Ивановская область',
+    'Амурская область',
+    'Магаданская область',
+    'Еврейская автономная область',
+    'Приморский край',
+    'Сахалинская область',
+    'Ненецкий автономный округ'
+];
+
+
+function updateCoordinatesAndRegion(coords) {
+    $('#geo_lat').val(coords[0]);
+    $('#geo_lon').val(coords[1]);
+
+    ymaps.geocode(coords).then(function (res) {
+        const geoObject = res.geoObjects.get(0);
+        if (!geoObject) return;
+
+        const region = geoObject.getAdministrativeAreas()?.[0] || '';
+        $('#region').val(region).attr('value', region);
+
+        const isSupported = supportedRegions.includes(region);
+
+        $('#submitBtn').prop('disabled', !isSupported);
+
+        if (!isSupported) {
+            $('#submitError')
+                .text('Расчёт стоимости для выбранного региона временно не поддерживается.')
+                .addClass('d-block');
+        } else {
+            $('#submitError').text('').removeClass('d-block');
+        }
+    });
+}
+
+
 function initMap() {
     ymaps.ready(function () {
         const map = new ymaps.Map('map', {
@@ -34,18 +147,16 @@ function initMap() {
         map.geoObjects.add(placemark);
 
         // Обработчик перемещения метки
-        placemark.events.add('dragend', function (e) {
+        placemark.events.add('dragend', function () {
             const coords = placemark.geometry.getCoordinates();
-            $('#geo_lat').val(coords[0]);
-            $('#geo_lon').val(coords[1]);
+            updateCoordinatesAndRegion(coords);
         });
 
         // Обработчик клика по карте
         map.events.add('click', function (e) {
             const coords = e.get('coords');
             placemark.geometry.setCoordinates(coords);
-            $('#geo_lat').val(coords[0]);
-            $('#geo_lon').val(coords[1]);
+            updateCoordinatesAndRegion(coords);
         });
     });
 }
@@ -70,14 +181,17 @@ $(document).ready(function () {
         }
         lastRequestTime = now;
 
+        if ($('#submitBtn').prop('disabled')) {
+            return; // Блокируем отправку, если регион не поддерживается
+        }
+
         const $submitBtn = $('#submitBtn');
         const $spinner = $('#loadingSpinner');
-        const $cancelBtn = $('#cancelBtn'); // Добавим эту кнопку в HTML
+
 
         // Блокировка UI
         $submitBtn.prop('disabled', true);
         $spinner.removeClass('d-none');
-        $cancelBtn.removeClass('d-none');
         $('#submitError').text('').removeClass('d-block');
 
 
@@ -117,24 +231,8 @@ $(document).ready(function () {
             complete: function () {
                 $submitBtn.prop('disabled', false);
                 $spinner.addClass('d-none');
-                $cancelBtn.addClass('d-none');
                 currentRequest = null;
             }
         });
-    });
-
-    // Добавьте этот обработчик для кнопки отмены
-    $('#cancelBtn').click(function () {
-        if (currentRequest) {
-            currentRequest.abort();
-            // Отправляем запрос на отмену обработки на сервере
-            $.get('/api/cancel-prediction/');
-
-            $('#submitError').text('Запрос отменен').addClass('d-block');
-            $('#submitBtn').prop('disabled', false);
-            $('#loadingSpinner').addClass('d-none');
-            $(this).addClass('d-none');
-            currentRequest = null;
-        }
     });
 });
