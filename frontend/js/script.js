@@ -212,9 +212,6 @@ $(document).ready(function () {
                 $('#price').text(new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽');
                 $('#result').removeClass('d-none');
 
-                if (response.shap_image) {
-                    $('#shap-plot').attr('src', 'data:image/png;base64,' + response.shap_image);
-                }
             },
             error: function (xhr) {
                 if (xhr.statusText !== 'abort') { // Не показываем ошибку при отмене
