@@ -117,13 +117,13 @@ function updateCoordinatesAndRegion(coords) {
 function initMap() {
     ymaps.ready(function () {
         const map = new ymaps.Map('map', {
-            center: [45.091628, 38.901597], // Краснодар по умолчанию
+            center: [47.237394, 39.712237], // ДГТУ по умолчанию
             zoom: 12
         });
 
         // Создаем метку
         const placemark = new ymaps.Placemark(
-            [45.091628, 38.901597],
+            [47.237394, 39.712237],
             {
                 hintContent: 'Переместите меня!',
                 balloonContent: 'Укажите точное местоположение объекта'
@@ -133,16 +133,6 @@ function initMap() {
                 preset: 'islands#redDotIcon'
             }
         );
-
-        // Анимация для привлечения внимания
-        placemark.events.add('mouseenter', function () {
-            placemark.options.set('preset', 'islands#greenDotIcon');
-        });
-
-        placemark.events.add('mouseleave', function () {
-            placemark.options.set('preset', 'islands#redDotIcon');
-        });
-
 
         map.geoObjects.add(placemark);
 
@@ -164,15 +154,10 @@ function initMap() {
 // Вызов инициализации карты
 initMap();
 
-// Обработчик формы (обновленный)
+// Обработчик формы
 $(document).ready(function () {
     $('#predictionForm').submit(function (e) {
         e.preventDefault();
-
-        // Отменяем предыдущий запрос, если есть
-        if (currentRequest) {
-            currentRequest.abort();
-        }
 
         const now = Date.now();
         if (now - lastRequestTime < 3000) {
@@ -220,8 +205,16 @@ $(document).ready(function () {
                 currentRequest = jqXHR;
             },
             success: function (response) {
-                $('#price').text(new Intl.NumberFormat('ru-RU').format(response.price) + ' ₽');
+                // Исходная сумма
+                let price = response.price;
+                // Округление вверх до ближайших 50 000
+                let roundedPrice = Math.ceil(price / 50000) * 50000;
+                $('#price').text(new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽');
                 $('#result').removeClass('d-none');
+
+                if (response.shap_image) {
+                    $('#shap-plot').attr('src', 'data:image/png;base64,' + response.shap_image);
+                }
             },
             error: function (xhr) {
                 if (xhr.statusText !== 'abort') { // Не показываем ошибку при отмене
