@@ -50,6 +50,9 @@ INSTALLED_APPS = [
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
+LOGOUT_REDIRECT_URL = 'index'  # Имя URL, куда перенаправлять после выхода
+LOGIN_REDIRECT_URL = 'index'  # Имя URL, куда перенаправлять после выхода
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -118,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -133,7 +136,18 @@ STATICFILES_DIRS = [
     FRONTEND_DIR,  # Django будет искать статику и в /frontend
 ]
 
-STATIC_URL = 'static/'
+STATIC_URL = '/frontend/'
+
+STATICFILES_DIRS = [
+    FRONTEND_DIR,  # Каталог для пользовательских статических файлов
+]
+
+
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(FRONTEND_DIR, 'static')]
+
+else:
+    STATIC_ROOT = os.path.join(FRONTEND_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

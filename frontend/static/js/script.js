@@ -195,15 +195,39 @@ $(document).ready(function () {
             month: parseInt($('#month').val())
         };
 
+        function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+
+        }
+
         // Создаем и сохраняем запрос
         currentRequest = $.ajax({
             url: '/api/predict/',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(formData),
-            beforeSend: function (jqXHR) {
-                currentRequest = jqXHR;
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') // Добавляем CSRF-токен
             },
+            data:
+                JSON.stringify(formData),
+            beforeSend:
+
+                function (jqXHR) {
+                    currentRequest = jqXHR;
+                }
+
+            ,
             success: function (response) {
                 // Исходная сумма
                 let price = response.price;
@@ -212,17 +236,20 @@ $(document).ready(function () {
                 $('#price').text(new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽');
                 $('#result').removeClass('d-none');
 
-            },
+            }
+            ,
             error: function (xhr) {
                 if (xhr.statusText !== 'abort') { // Не показываем ошибку при отмене
                     $('#submitError').text(xhr.responseJSON?.detail || 'Ошибка сервера').addClass('d-block');
                 }
-            },
+            }
+            ,
             complete: function () {
                 $submitBtn.prop('disabled', false);
                 $spinner.addClass('d-none');
                 currentRequest = null;
             }
-        });
+        })
+        ;
     });
 });

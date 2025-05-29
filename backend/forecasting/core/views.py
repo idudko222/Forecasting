@@ -4,6 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import PredictionInputSerializer
+from django.contrib.auth import login
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from .forms import CustomRegisterForm
 
 # Загрузка моделей один раз при старте приложения
 model = joblib.load('core/ml/model.pkl')
@@ -43,3 +47,20 @@ class PredictAPIView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+from django.contrib.auth.views import LoginView
+
+class CustomLoginView(LoginView):
+    template_name = 'html/login.html'
+    success_url = reverse_lazy('index')
+
+
+class RegisterView(CreateView):
+    form_class = CustomRegisterForm
+    template_name = 'html/register.html'
+    success_url = reverse_lazy('index')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)  # Автоматический вход
+        return response
