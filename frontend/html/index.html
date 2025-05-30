@@ -144,6 +144,21 @@
                 </div>
                 <div class="invalid-feedback" id="submitError"></div>
             </div>
+            {% if user.is_authenticated %}
+            <div class="col-md-4">
+                <div class="card history-card">
+                    <div class="card-header">
+                        <h5>История запросов</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyList">
+                            <!-- Здесь будет загружаться история -->
+                            <div class="text-muted">Загрузка истории...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </form>
 

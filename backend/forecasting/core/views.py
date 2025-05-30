@@ -8,6 +8,9 @@ from django.contrib.auth import login
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from .forms import CustomRegisterForm
+from .models import SearchHistory
+from django.contrib.auth.views import LoginView
+
 
 # Загрузка моделей один раз при старте приложения
 model = joblib.load('core/ml/model.pkl')
@@ -40,6 +43,13 @@ class PredictAPIView(APIView):
             # 5. Предсказание
             price = model.predict(scaled)[0]
 
+            if request.user.is_authenticated:
+                SearchHistory.objects.create(
+                    user=request.user,
+                    search_data=request.data,
+                    result=price
+                )
+
             return Response({'price': round(price, 2)}, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -48,9 +58,37 @@ class PredictAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from django.contrib.auth.views import LoginView
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response([], status=status.HTTP_200_OK)
 
-class CustomLoginView(LoginView):
+        history = SearchHistory.objects.filter(user=request.user).order_by('-created_at')
+        data = [{
+            'id': item.id,
+            'params': {
+                'rooms': item.search_data.get('rooms'),
+                'area': item.search_data.get('area'),
+                'building_type': self.get_building_type(item.search_data.get('building_type')),
+            },
+            'result': item.result,
+            'date': item.created_at.strftime("%d.%m.%Y %H:%M")
+        } for item in history]
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    def get_building_type(self, type_id):
+        types = {
+            0: 'Другой',
+            1: 'Панельный',
+            2: 'Монолитный',
+            3: 'Кирпичный',
+            4: 'Блочный',
+            5: 'Деревянный'
+        }
+        return types.get(type_id, 'Неизвестно')
+
+
+class CustomView(LoginView):
     template_name = 'html/login.html'
     success_url = reverse_lazy('index')
 

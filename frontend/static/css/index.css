@@ -45,6 +45,33 @@
     margin-right: 10px;
 }
 
+.history-card {
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.history-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.history-item:hover {
+    background: #f8f9fa;
+}
+.history-params {
+    font-size: 0.9rem;
+    color: #666;
+}
+.history-result {
+    font-weight: bold;
+    color: #2a6496;
+}
+.history-date {
+    font-size: 0.8rem;
+    color: #999;
+}
+
 @media (max-width: 576px) {
     #nav-logo {
         height: 30px;

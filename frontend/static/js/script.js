@@ -151,6 +151,68 @@ function initMap() {
     });
 }
 
+function loadHistory() {
+    $.ajax({
+        url: '/api/predict/',
+        type: 'GET',
+        success: function(data) {
+            const container = $('#historyList');
+            container.empty();
+
+            if (data.length === 0) {
+                container.append('<div class="text-muted">История запросов пуста</div>');
+                return;
+            }
+
+            data.forEach(item => {
+                container.append(`
+                    <div class="history-item" data-id="${item.id}">
+                        <div class="history-params">
+                            ${item.params.rooms}-к, ${item.params.area}м², ${item.params.building_type}
+                        </div>
+                        <div class="history-result">
+                            ${new Intl.NumberFormat('ru-RU').format(Math.round(item.result))} ₽
+                        </div>
+                        <div class="history-date">
+                            ${item.date}
+                        </div>
+                    </div>
+                `);
+            });
+
+            // Обработчик клика для повтора запроса
+            $('.history-item').click(function() {
+                const itemId = $(this).data('id');
+                const item = data.find(i => i.id == itemId);
+                fillFormFromHistory(item.params);
+            });
+        },
+        error: function() {
+            $('#historyList').html('<div class="text-danger">Ошибка загрузки истории</div>');
+        }
+    });
+}
+
+function fillFormFromHistory(params) {
+    // Заполняем форму данными из истории
+    $('#rooms').val(params.rooms);
+    $('#area').val(params.area);
+    $('#building_type').val(params.building_type_id); // предполагая, что value совпадает
+
+    // Прокручиваем к форме
+    $('html, body').animate({
+        scrollTop: $('#predictionForm').offset().top - 20
+    }, 500);
+}
+
+// Загружаем историю при загрузке страницы и после каждого успешного прогноза
+$(document).ready(function() {
+    loadHistory();
+
+    // В success-колбэке вашего основного AJAX-запроса добавьте:
+    // loadHistory();
+});
+
 // Вызов инициализации карты
 initMap();
 
@@ -196,18 +258,18 @@ $(document).ready(function () {
         };
 
         function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
-        }
-        return cookieValue;
+            return cookieValue;
 
         }
 
@@ -235,6 +297,7 @@ $(document).ready(function () {
                 let roundedPrice = Math.ceil(price / 50000) * 50000;
                 $('#price').text(new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽');
                 $('#result').removeClass('d-none');
+                loadHistory();
 
             }
             ,
