@@ -13,9 +13,9 @@ from django.contrib.auth.views import LoginView
 
 
 # Загрузка моделей один раз при старте приложения
-model = joblib.load('core/ml/model.pkl')
-encoder = joblib.load('core/ml/encoder.pkl')
-scaler = joblib.load('core/ml/scaler.pkl')
+# model = joblib.load('core/ml/model.pkl')
+# encoder = joblib.load('core/ml/encoder.pkl')
+# scaler = joblib.load('core/ml/scaler.pkl')
 
 
 class PredictAPIView(APIView):
@@ -68,7 +68,14 @@ class PredictAPIView(APIView):
             'params': {
                 'rooms': item.search_data.get('rooms'),
                 'area': item.search_data.get('area'),
-                'building_type': self.get_building_type(item.search_data.get('building_type')),
+                'kitchen_area': item.search_data.get('kitchen_area'),
+                'level': item.search_data.get('level'),
+                'levels': item.search_data.get('levels'),
+                'building_type': item.search_data.get('building_type'),
+                'object_type': item.search_data.get('object_type'),
+                'region': item.search_data.get('region'),
+                'geo_lat': item.search_data.get('geo_lat'),
+                'geo_lon': item.search_data.get('geo_lon'),
             },
             'result': item.result,
             'date': item.created_at.strftime("%d.%m.%Y %H:%M")

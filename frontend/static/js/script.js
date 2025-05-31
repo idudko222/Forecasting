@@ -1,5 +1,7 @@
 let currentRequest = null; // Для хранения текущего AJAX-запроса
 let lastRequestTime = 0; // Для защиты от частых запросов
+let map;
+let placemark;
 
 const supportedRegions = [
     'Санкт-Петербург',
@@ -116,13 +118,13 @@ function updateCoordinatesAndRegion(coords) {
 
 function initMap() {
     ymaps.ready(function () {
-        const map = new ymaps.Map('map', {
+        map = new ymaps.Map('map', {
             center: [47.237394, 39.712237], // ДГТУ по умолчанию
             zoom: 12
         });
 
         // Создаем метку
-        const placemark = new ymaps.Placemark(
+        placemark = new ymaps.Placemark(
             [47.237394, 39.712237],
             {
                 hintContent: 'Переместите меня!',
@@ -151,11 +153,52 @@ function initMap() {
     });
 }
 
+function updateMapCoordinates(lat, lon) {
+    if (!map || !placemark) return;
+
+    const newCoords = [parseFloat(lat), parseFloat(lon)];
+
+    // Обновляем позицию метки
+    placemark.geometry.setCoordinates(newCoords);
+
+    // Центрируем карту на новой позиции
+    map.setCenter(newCoords, 15); // 15 - уровень зума
+
+    // Обновляем скрытые поля формы
+    $('#geo_lat').val(lat);
+    $('#geo_lon').val(lon);
+
+    // Получаем адрес по координатам
+    updateAddressByCoords(newCoords);
+}
+
+function updateAddressByCoords(coords) {
+    ymaps.geocode(coords).then(function (res) {
+        const firstGeoObject = res.geoObjects.get(0);
+        if (firstGeoObject) {
+            const region = firstGeoObject.getAdministrativeAreas()?.[0] || '';
+            $('#region').val(region);
+        }
+    });
+}
+
+function getBuildingTypeName(typeId) {
+    const types = {
+        0: 'Другой',
+        1: 'Панельный',
+        2: 'Монолитный',
+        3: 'Кирпичный',
+        4: 'Блочный',
+        5: 'Деревянный'
+    };
+    return types[typeId] || 'Неизвестно';
+}
+
 function loadHistory() {
     $.ajax({
         url: '/api/predict/',
         type: 'GET',
-        success: function(data) {
+        success: function (data) {
             const container = $('#historyList');
             container.empty();
 
@@ -168,7 +211,7 @@ function loadHistory() {
                 container.append(`
                     <div class="history-item" data-id="${item.id}">
                         <div class="history-params">
-                            ${item.params.rooms}-к, ${item.params.area}м², ${item.params.building_type}
+                           ${item.params.region}, ${item.params.rooms}-к, ${item.params.area}м²,  ${getBuildingTypeName(item.params.building_type)}
                         </div>
                         <div class="history-result">
                             ${new Intl.NumberFormat('ru-RU').format(Math.round(item.result))} ₽
@@ -197,24 +240,32 @@ function fillFormFromHistory(params) {
     // Заполняем форму данными из истории
     $('#rooms').val(params.rooms);
     $('#area').val(params.area);
-    $('#building_type').val(params.building_type_id); // предполагая, что value совпадает
+    $('#building_type').val(params.building_type); // предполагая, что value совпадает
+    $('#kitchen_area').val(params.kitchen_area);
+    $('#levels').val(params.levels);
+    $('#level').val(params.level);
+
+    if (params.geo_lat && params.geo_lon) {
+        updateMapCoordinates(params.geo_lat, params.geo_lon);
+    } else {
+        // Координаты по умолчанию, если нет в истории
+        updateMapCoordinates('45.091628', '38.901597');
+    }
 
     // Прокручиваем к форме
     $('html, body').animate({
         scrollTop: $('#predictionForm').offset().top - 20
-    }, 500);
+    }, 200);
 }
 
 // Загружаем историю при загрузке страницы и после каждого успешного прогноза
-$(document).ready(function() {
+$(document).ready(function () {
     loadHistory();
-
-    // В success-колбэке вашего основного AJAX-запроса добавьте:
-    // loadHistory();
+    initMap();
+    // Инициализация с координатами по умолчанию
+    updateMapCoordinates($('#geo_lat').val(), $('#geo_lon').val());
 });
 
-// Вызов инициализации карты
-initMap();
 
 // Обработчик формы
 $(document).ready(function () {
