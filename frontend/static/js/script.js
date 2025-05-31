@@ -235,12 +235,13 @@ function loadHistory() {
                 `);
             });
 
-             // Инициализация tooltip для новых элементов
-            $('.history-item').tooltip({
-                html: true,
-                sanitize: false,
-                placement: 'right'
-            });
+              // Инициализация tooltip только на десктопах
+            if (window.innerWidth > 768) {
+                $('[data-bs-toggle="tooltip"]').tooltip({
+                    html: true,
+                    sanitize: false
+                });
+            }
 
             // Обработчик клика для повтора запроса
             $('.history-item').click(function () {
@@ -254,6 +255,17 @@ function loadHistory() {
         }
     });
 }
+
+$(window).resize(function() {
+    if (window.innerWidth <= 768) {
+        $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+    } else {
+        $('[data-bs-toggle="tooltip"]').tooltip({
+            html: true,
+            sanitize: false
+        });
+    }
+});
 
 function fillFormFromHistory(params) {
     // Заполняем форму данными из истории
@@ -392,3 +404,23 @@ $(document).ready(function () {
         ;
     });
 });
+
+// Функция для заполнения формы из истории (уже есть, обновляем)
+function fillFormFromHistory(params) {
+    $('#rooms').val(params.rooms);
+    $('#area').val(params.area);
+    $('#building_type').val(params.building_type);
+    $('#kitchen_area').val(params.kitchen_area);
+    $('#levels').val(params.levels);
+    $('#level').val(params.level);
+    $('#object_type').val(params.object_type || 1);
+
+    if (params.geo_lat && params.geo_lon) {
+        updateMapCoordinates(params.geo_lat, params.geo_lon);
+    }
+
+    // Обновляем регион, если он есть
+    if (params.region) {
+        $('#region').val(params.region);
+    }
+}

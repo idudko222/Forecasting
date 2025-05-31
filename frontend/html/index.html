@@ -23,9 +23,12 @@
         <a class="navbar-brand" href="#">
             <img src="/frontend/img/icon.jpg" alt="Логотип" class="d-inline-block align-text-top" id="nav-logo">
         </a>
-        <div>
+        <div class="d-flex gap-2">
             {% if user.is_authenticated %}
             <!-- Показываем для авторизованных -->
+            <button class="btn" id="history" href="{% url 'history' %}">
+                    <i class="bi bi-clock-history" style="font-size: 2rem; color: #0d6efd;"></i>
+            </button>
             <div class="dropdown">
                 <button class="btn" id="profileDropdown" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle" style="font-size: 2rem; color: #0d6efd;"></i>
@@ -34,6 +37,7 @@
                     <li><h6 class="dropdown-header">Профиль</h6></li>
                     <li><span class="dropdown-item">Пользователь: {{ user.username }}</span></li>
                     <li><span class="dropdown-item">Почта: {{ user.email }}</span></li>
+                    <li><span class="dropdown-item">История запросов</span></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>

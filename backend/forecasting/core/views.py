@@ -5,11 +5,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import PredictionInputSerializer
 from django.contrib.auth import login
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 from django.urls import reverse_lazy
 from .forms import CustomRegisterForm
 from .models import SearchHistory
 from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Загрузка моделей один раз при старте приложения
@@ -109,3 +110,12 @@ class RegisterView(CreateView):
         response = super().form_valid(form)
         login(self.request, self.object)  # Автоматический вход
         return response
+
+class FullHistoryView(LoginRequiredMixin, ListView):
+    model = SearchHistory
+    template_name = 'html/history.html'
+    context_object_name = 'history_items'
+    paginate_by = 20  # Пагинация по 20 элементов
+
+    def get_queryset(self):
+        return SearchHistory.objects.filter(user=self.request.user).order_by('-created_at')

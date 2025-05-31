@@ -81,6 +81,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'my_tags': 'core.templatetags.param_names',  # Укажите путь к модулю
+            },
         },
     },
 ]
@@ -141,7 +144,6 @@ STATIC_URL = '/frontend/'
 STATICFILES_DIRS = [
     FRONTEND_DIR,  # Каталог для пользовательских статических файлов
 ]
-
 
 if DEBUG:
     STATICFILES_DIRS = [os.path.join(FRONTEND_DIR, 'static')]

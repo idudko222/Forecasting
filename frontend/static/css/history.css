@@ -1,0 +1,15 @@
+/* Стили для страницы истории */
+.table-history {
+    font-size: 14px;
+}
+.table-history th {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+}
+.table-history tr:hover {
+    background-color: #f8f9fa;
+}
+.repeat-search {
+    white-space: nowrap;
+}
