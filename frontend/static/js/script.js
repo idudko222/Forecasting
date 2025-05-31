@@ -209,9 +209,21 @@ function loadHistory() {
 
             data.forEach(item => {
                 container.append(`
-                    <div class="history-item" data-id="${item.id}">
+                    <div class="history-item" data-id="${item.id}" 
+                         data-bs-toggle="tooltip" 
+                         data-bs-placement="right"
+                         data-bs-title="
+                            Регион: ${item.params.region}<br>
+                            Комнат: ${item.params.rooms}<br>
+                            Площадь: ${item.params.area} м²<br>
+                            Кухня: ${item.params.kitchen_area} м²<br>
+                            Этаж: ${item.params.level}/${item.params.levels}<br>
+                            Тип здания: ${getBuildingTypeName(item.params.building_type)}<br>
+                            Тип объекта: ${item.params.object_type === 1 ? 'Новостройка' : 'Вторичка'}<br>
+                            Дата: ${item.date}
+                         ">
                         <div class="history-params">
-                           ${item.params.region}, ${item.params.rooms}-к, ${item.params.area}м²,  ${getBuildingTypeName(item.params.building_type)}
+                           ${item.params.region}, ${item.params.rooms}-к, ${item.params.area}м², ${getBuildingTypeName(item.params.building_type)}
                         </div>
                         <div class="history-result">
                             ${new Intl.NumberFormat('ru-RU').format(Math.round(item.result))} ₽
@@ -223,14 +235,21 @@ function loadHistory() {
                 `);
             });
 
+             // Инициализация tooltip для новых элементов
+            $('.history-item').tooltip({
+                html: true,
+                sanitize: false,
+                placement: 'right'
+            });
+
             // Обработчик клика для повтора запроса
-            $('.history-item').click(function() {
+            $('.history-item').click(function () {
                 const itemId = $(this).data('id');
                 const item = data.find(i => i.id == itemId);
                 fillFormFromHistory(item.params);
             });
         },
-        error: function() {
+        error: function () {
             $('#historyList').html('<div class="text-danger">Ошибка загрузки истории</div>');
         }
     });
@@ -260,10 +279,16 @@ function fillFormFromHistory(params) {
 
 // Загружаем историю при загрузке страницы и после каждого успешного прогноза
 $(document).ready(function () {
-    loadHistory();
-    initMap();
     // Инициализация с координатами по умолчанию
     updateMapCoordinates($('#geo_lat').val(), $('#geo_lon').val());
+
+     $('[data-bs-toggle="tooltip"]').tooltip({
+        html: true,
+        sanitize: false,
+         placement: 'right',
+    });
+     loadHistory();
+    initMap();
 });
 
 

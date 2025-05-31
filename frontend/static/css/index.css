@@ -75,6 +75,58 @@
     color: #999;
 }
 
+.history-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: none;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.history-item:hover .history-tooltip {
+    display: block;
+}
+
+.tooltip {
+    position: absolute;
+    z-index: 9999; /* Выше всех элементов */
+}
+
+.tooltip-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.tooltip-label {
+    font-weight: 500;
+    color: #555;
+    min-width: 140px;
+}
+
+.tooltip-value {
+    color: #333;
+    flex-grow: 1;
+}
+
+.tooltip-inner {
+    max-width: 300px;
+    text-align: left;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 10px;
+}
+
 @media (max-width: 576px) {
     #nav-logo {
         height: 30px;
