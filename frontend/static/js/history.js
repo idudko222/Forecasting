@@ -94,15 +94,34 @@ function sortFavoritesFirst() {
 
 // Функция для фильтрации - только избранные
 function filterFavoritesOnly(showOnlyFavorites) {
+    let hasFavorites = false;
+
     $('table tbody tr').each(function () {
-        const isFavorite = $(this).find('.favorite-btn').data('favorite') === 'True';
+        // Пропускаем строку с сообщением
+        if ($(this).find('td').text().includes('Нет избранных записей')) {
+            $(this).remove();
+            return;
+        }
+
+        // Проверяем наличие иконки заполненной звезды
+        const isFavorite = $(this).find('.bi-star-fill').length > 0;
         $(this).toggle(!showOnlyFavorites || isFavorite);
+
+        if (isFavorite) hasFavorites = true;
     });
+
+    // Добавляем сообщение, если нет избранных и фильтр активен
+    if (showOnlyFavorites && !hasFavorites) {
+        $('table tbody').append('<tr><td colspan="4" class="text-center py-4">Нет избранных записей</td></tr>');
+    }
 }
 
 // Инициализация при загрузке страницы
 $(document).ready(function () {
     sortFavoritesFirst();
+
+    const showOnlyFavorites = $('#showFavoritesOnly').is(':checked');
+    filterFavoritesOnly(showOnlyFavorites);
 
     // Обработчик переключателя
     $('#showFavoritesOnly').change(function () {
@@ -113,7 +132,8 @@ $(document).ready(function () {
 $(document).on('click', '.favorite-btn', function() {
     const button = $(this);
     const itemId = button.data('id');
-    const currentFavorite = button.data('favorite') === 'True';
+    const isCurrentlyFavorite = button.find('.bi-star-fill').length > 0;
+    const showOnlyFavorites = $('#showFavoritesOnly').is(':checked');
 
     $.ajax({
         url: `/toggle_favorite/${itemId}/`,
@@ -122,26 +142,26 @@ $(document).on('click', '.favorite-btn', function() {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
-        data: JSON.stringify({is_favorite: !currentFavorite}),
+        data: JSON.stringify({is_favorite: !isCurrentlyFavorite}),
         success: function(data) {
             if (data.success) {
-                // Обновляем данные кнопки
-                button.data('favorite', data.is_favorite);
-                button.attr('data-favorite', data.is_favorite);
-
-                // Меняем только иконку
+                // Переключаем иконку
                 const starIcon = button.find('i');
-                if (data.is_favorite) {
-                    starIcon.removeClass('bi-star').addClass('bi-star-fill');
-                } else {
-                    starIcon.removeClass('bi-star-fill').addClass('bi-star');
-                }
+                starIcon.toggleClass('bi-star bi-star-fill');
 
-                // Сортировка и фильтрация
+                // Переключаем классы кнопки
+                button.toggleClass('btn-outline-secondary btn-outline-warning');
+
+                // Сортировка
                 sortFavoritesFirst();
-                if ($('#showFavoritesOnly').is(':checked')) {
+
+                // Применяем текущий фильтр
+                if (showOnlyFavorites) {
                     filterFavoritesOnly(true);
                 }
+
+                // Удаляем сообщение "Нет избранных записей"
+                $('table tbody tr').filter(':contains("Нет избранных записей")').remove();
             }
         },
         error: function(xhr) {
