@@ -79,6 +79,37 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function sortFavoritesFirst() {
+    const tbody = $('table tbody');
+    const rows = tbody.find('tr').get();
+
+    rows.sort((a, b) => {
+        const aFav = $(a).find('.favorite-btn').data('favorite') === 'True';
+        const bFav = $(b).find('.favorite-btn').data('favorite') === 'True';
+        return (aFav === bFav) ? 0 : aFav ? -1 : 1;
+    });
+
+    tbody.empty().append(rows);
+}
+
+// Функция для фильтрации - только избранные
+function filterFavoritesOnly(showOnlyFavorites) {
+    $('table tbody tr').each(function () {
+        const isFavorite = $(this).find('.favorite-btn').data('favorite') === 'True';
+        $(this).toggle(!showOnlyFavorites || isFavorite);
+    });
+}
+
+// Инициализация при загрузке страницы
+$(document).ready(function () {
+    sortFavoritesFirst();
+
+    // Обработчик переключателя
+    $('#showFavoritesOnly').change(function () {
+        filterFavoritesOnly(this.checked);
+    });
+});
+
 $(document).on('click', '.favorite-btn', function () {
     const button = $(this);
     const itemId = button.data('id');
@@ -94,6 +125,17 @@ $(document).on('click', '.favorite-btn', function () {
         data: JSON.stringify({is_favorite: !currentFavorite}),
         success: function (data) {
             if (data.success) {
+                button.data('favorite', data.is_favorite);
+                button.attr('data-favorite', data.is_favorite);
+
+                // Обновляем классы кнопки
+                if (data.is_favorite) {
+                    button.removeClass('btn-outline-secondary').addClass('btn-outline-warning');
+                    button.find('i').removeClass('bi-star').addClass('bi-star-fill');
+                } else {
+                    button.removeClass('btn-outline-warning').addClass('btn-outline-secondary');
+                    button.find('i').removeClass('bi-star-fill').addClass('bi-star');
+                }
                 // Обновляем и данные jQuery, и DOM-атрибут
                 button.data('favorite', data.is_favorite);
                 button.attr('data-favorite', data.is_favorite); // Ключевое исправление!

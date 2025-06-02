@@ -28,6 +28,7 @@
 
 .favorite-btn i.bi-star-fill {
   color: #ffc107;
+    outline-color: black;
 }
 
 
@@ -38,4 +39,8 @@
 .favorite-btn:hover {
     background-color: rgba(243, 193, 13, 0.8);
     transform: scale(1.1);
+}
+
+.form-switch {
+    padding-top: 25px;
 }

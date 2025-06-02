@@ -10,8 +10,13 @@
 
 
 <div class="container mt-5">
-    <h1 class="mb-4">Полная история поиска</h1>
-
+    <div class="d-flex justify-content-between mb-4">
+        <h1>Полная история поиска</h1>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="showFavoritesOnly" style="transform: scale(1.5);">
+            <label class="form-check-label ms-2" for="showFavoritesOnly">Только избранное</label>
+        </div>
+    </div>
     <div class="table-responsive">
         <table class="table table-history">
             <thead class="table-light">
@@ -51,8 +56,8 @@
                     <button class="btn btn-lg btn-outline-danger delete-history" data-id="{{ item.id }}">
                         <i class="bi bi-trash"></i>
                     </button>
-                    <button class="btn btn-lg btn-outline-warning favorite-btn" data-id="{{ item.id }}"
-                            data-favorite="{{ item.is_favorite }}">
+                    <button class="btn btn-lg favorite-btn {% if item.is_favorite %}btn-outline-warning{% else %}btn-outline-secondary{% endif %}"
+                            data-id="{{ item.id }}" data-favorite="{{ item.is_favorite }}">
                         {% if item.is_favorite %}
                         <i class="bi bi-star-fill"></i>
                         {% else %}
