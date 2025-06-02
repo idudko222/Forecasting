@@ -30,9 +30,9 @@
                 <i class="bi bi-clock-history" style="font-size: 2rem; color: #0d6efd;"></i>
             </a>
             <div class="dropdown">
-                <button class="btn" id="profileDropdown" data-bs-toggle="dropdown">
+                <a class="btn" id="profileDropdown" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle" style="font-size: 2rem; color: #0d6efd;"></i>
-                </button>
+                </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><h6 class="dropdown-header">Профиль</h6></li>
                     <li><span class="dropdown-item">Пользователь: {{ user.username }}</span></li>
@@ -80,11 +80,12 @@
             </div>
             <div class="col-md-6">
                 <label for="region" class="form-label">Регион</label>
-                <input type="text" class="form-control" id="region" value="Ростовская область" required>
+                <input type="text" class="form-control" id="region" value="Ростовская область" required disabled>
             </div>
             <div class="col-md-6">
                 <label for="building_type" class="form-label">Тип здания</label>
                 <select class="form-select" id="building_type" required>
+                    <option value="" disabled selected>Выберите тип здания</option>
                     <option value="0">Другой</option>
                     <option value="1">Панельный</option>
                     <option value="2">Монолитный</option>
@@ -95,11 +96,12 @@
             </div>
             <div class="col-md-4">
                 <label for="rooms" class="form-label">Количество комнат</label>
-                <input type="number" class="form-control" id="rooms" min="0" required>
+                <input type="number" class="form-control" id="rooms" min="1" required placeholder="Минимум 1">
             </div>
             <div class="col-md-4">
                 <label for="area" class="form-label">Общая площадь (м²)</label>
-                <input type="number" class="form-control" id="area" step="0.1" required>
+                <input type="number" class="form-control" id="area" min="10" step="0.1" required
+                       placeholder="Минимум 10 м²">
             </div>
             <div class="col-md-4">
                 <label for="kitchen_area" class="form-label">Площадь кухни (м²)</label>
@@ -109,17 +111,18 @@
             </div>
             <div class="col-md-4">
                 <label for="level" class="form-label">Этаж</label>
-                <input type="number" class="form-control" id="level" min="1" required>
+                <input type="number" class="form-control" id="level" min="1" required placeholder="Минимум 1">
             </div>
             <div class="col-md-4">
                 <label for="levels" class="form-label">Этажей в доме</label>
-                <input type="number" class="form-control" id="levels" min="1" required>
+                <input type="number" class="form-control" id="levels" min="1" required placeholder="Минимум 1">
             </div>
             <div class="col-md-4">
                 <label for="object_type" class="form-label">Тип объекта</label>
                 <select class="form-select" id="object_type" required>
+                    <option value="" disabled selected>Выберите тип объекта</option>
                     <option value="1">Новостройка</option>
-                    <option value="2" selected>Вторичка</option>
+                    <option value="2">Вторичка</option>
                 </select>
             </div>
             <script>
@@ -170,6 +173,21 @@
                         <div id="historyList">
                             <div class="text-muted">Загрузка истории...</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if not user.is_authenticated %}
+            <!-- Блок результата для неавторизованных пользователей -->
+            <div class="col-12">
+                <div id="result" class="card md-light rounded" style="margin-bottom: 20px">
+                    <div class="card-header">
+                        <h5 style="margin-bottom: .1rem;">Результат оценки</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="display-4" id="price">-</div>
+                        <div class="text-muted mt-2">Среднерыночная стоимость</div>
                     </div>
                 </div>
             </div>
