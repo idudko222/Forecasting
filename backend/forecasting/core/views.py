@@ -12,12 +12,13 @@ from .models import SearchHistory
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
+import math
 
 
 # Загрузка моделей один раз при старте приложения
-# model = joblib.load('core/ml/model.pkl')
-# encoder = joblib.load('core/ml/encoder.pkl')
-# scaler = joblib.load('core/ml/scaler.pkl')
+model = joblib.load('core/ml/model.pkl')
+encoder = joblib.load('core/ml/encoder.pkl')
+scaler = joblib.load('core/ml/scaler.pkl')
 
 
 class PredictAPIView(APIView):
@@ -52,7 +53,7 @@ class PredictAPIView(APIView):
                     result=price
                 )
 
-            return Response({'price': round(price, 2)}, status=status.HTTP_200_OK)
+            return Response({'price': (math.ceil(int(price / 50000)) * 50000)}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(

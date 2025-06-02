@@ -202,12 +202,14 @@ function loadHistory() {
             const container = $('#historyList');
             container.empty();
 
-            if (data.length === 0) {
+            const lastFiveItems = data.slice(0, 3);
+
+            if (lastFiveItems.length === 0) {
                 container.append('<div class="text-muted">История запросов пуста</div>');
                 return;
             }
 
-            data.forEach(item => {
+             lastFiveItems.forEach(item => {
                 container.append(`
                     <div class="history-item" data-id="${item.id}" 
                          data-bs-toggle="tooltip" 
@@ -226,7 +228,7 @@ function loadHistory() {
                            ${item.params.region}, ${item.params.rooms}-к, ${item.params.area}м², ${getBuildingTypeName(item.params.building_type)}
                         </div>
                         <div class="history-result">
-                            ${new Intl.NumberFormat('ru-RU').format(Math.round(item.result))} ₽
+                           ${new Intl.NumberFormat('ru-RU').format(Math.round(item.result / 50000) * 50000)} ₽
                         </div>
                         <div class="history-date">
                             ${item.date}
@@ -361,8 +363,8 @@ $(document).ready(function () {
                 // Исходная сумма
                 let price = response.price;
                 // Округление вверх до ближайших 50 000
-                let roundedPrice = Math.ceil(price / 50000) * 50000;
-                $('#price').text(new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽');
+                // let roundedPrice = Math.ceil(price / 50000) * 50000;
+                $('#price').text(new Intl.NumberFormat('ru-RU').format(price) + ' ₽');
                 $('#result').removeClass('d-none');
                 loadHistory();
 
