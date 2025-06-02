@@ -5,6 +5,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://api-maps.yandex.ru/2.1/?apikey=3ae0c17a-35e5-463a-8274-44abd3520362&lang=ru_RU"></script>
 <link rel="stylesheet" href="{% static 'css/history.css' %}">
+<script src="{% static 'js/history.js' %}"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
 
 <div class="container mt-5">
@@ -46,9 +48,8 @@
                 </td>
                 <td class="fw-bold" id="price-{{ item.id }}" data-price="{{ item.result|floatformat:'0' }}"></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary repeat-search"
-                            data-params='{{ item.search_data|escapejs }}'>
-                        Повторить
+                    <button class="btn btn-sm btn-outline-danger delete-history" data-id="{{ item.id }}">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             </tr>
@@ -63,50 +64,10 @@
 </div>
 
 <script>
-    document.querySelectorAll('[id^="price-"]').forEach(function(el) {
-    const price = parseFloat(el.dataset.price);
-    const roundedPrice = Math.ceil(price / 50000) * 50000;
-    el.textContent = new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽';
-});
-
-    ymaps.ready(function () {
-        console.log("ymaps.ready() вызван"); // Проверка, что API инициализировано
-        $('tr[data-lat]').each(function () {
-            const $row = $(this);
-            const lat = $row.data('lat');
-            const lon = $row.data('lon');
-
-            console.log("Обработка строки:", $row);
-            console.log("Полученные координаты:", lat, lon);
-
-            if (lat && lon) {
-                // Проверка, есть ли ymaps.geocode
-                if (typeof ymaps.geocode !== 'function') {
-                    console.error('ymaps.geocode не является функцией');
-                    return;
-                }
-
-                ymaps.geocode([lat, lon]).then(function (res) {
-                    console.log("geocode выполнен успешно для координат:", lat, lon);
-                    if (res.geoObjects.get(0)) {
-                        const address = res.geoObjects.get(0).getAddressLine();
-                        console.log("Найден адрес:", address);
-                        $row.find('.params-grid').append(`
-                        <div class="param-item">
-                            <span class="param-name">Адрес:</span>
-                            <span class="param-value">${address}</span>
-                        </div>
-                    `);
-                    } else {
-                        console.warn("Геообъекты не найдены для координат:", lat, lon);
-                    }
-                }, function (error) {
-                    console.error("Ошибка при вызове geocode:", error);
-                });
-            } else {
-                console.warn("Координаты отсутствуют или некорректны:", lat, lon);
-            }
-        });
+    document.querySelectorAll('[id^="price-"]').forEach(function (el) {
+        const price = parseFloat(el.dataset.price);
+        const roundedPrice = Math.ceil(price / 50000) * 50000;
+        el.textContent = new Intl.NumberFormat('ru-RU').format(roundedPrice) + ' ₽';
     });
 </script>
 {% endblock %}

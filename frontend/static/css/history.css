@@ -2,14 +2,26 @@
 .table-history {
     font-size: 14px;
 }
+
 .table-history th {
     background-color: #f8f9fa;
     position: sticky;
     top: 0;
 }
+
 .table-history tr:hover {
     background-color: #f8f9fa;
 }
+
 .repeat-search {
     white-space: nowrap;
+}
+
+.delete-history {
+    transition: all 0.2s;
+}
+
+.delete-history:hover {
+    transform: scale(1.1);
+    color: white !important;
 }

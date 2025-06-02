@@ -235,7 +235,7 @@ function loadHistory() {
                 `);
             });
 
-              // Инициализация tooltip только на десктопах
+            // Инициализация tooltip только на десктопах
             if (window.innerWidth > 768) {
                 $('[data-bs-toggle="tooltip"]').tooltip({
                     html: true,
@@ -256,7 +256,7 @@ function loadHistory() {
     });
 }
 
-$(window).resize(function() {
+$(window).resize(function () {
     if (window.innerWidth <= 768) {
         $('[data-bs-toggle="tooltip"]').tooltip('dispose');
     } else {
@@ -267,39 +267,18 @@ $(window).resize(function() {
     }
 });
 
-function fillFormFromHistory(params) {
-    // Заполняем форму данными из истории
-    $('#rooms').val(params.rooms);
-    $('#area').val(params.area);
-    $('#building_type').val(params.building_type); // предполагая, что value совпадает
-    $('#kitchen_area').val(params.kitchen_area);
-    $('#levels').val(params.levels);
-    $('#level').val(params.level);
-
-    if (params.geo_lat && params.geo_lon) {
-        updateMapCoordinates(params.geo_lat, params.geo_lon);
-    } else {
-        // Координаты по умолчанию, если нет в истории
-        updateMapCoordinates('45.091628', '38.901597');
-    }
-
-    // Прокручиваем к форме
-    $('html, body').animate({
-        scrollTop: $('#predictionForm').offset().top - 20
-    }, 200);
-}
 
 // Загружаем историю при загрузке страницы и после каждого успешного прогноза
 $(document).ready(function () {
     // Инициализация с координатами по умолчанию
     updateMapCoordinates($('#geo_lat').val(), $('#geo_lon').val());
 
-     $('[data-bs-toggle="tooltip"]').tooltip({
+    $('[data-bs-toggle="tooltip"]').tooltip({
         html: true,
         sanitize: false,
-         placement: 'right',
+        placement: 'right',
     });
-     loadHistory();
+    loadHistory();
     initMap();
 });
 
@@ -405,7 +384,7 @@ $(document).ready(function () {
     });
 });
 
-// Функция для заполнения формы из истории (уже есть, обновляем)
+// Функция для заполнения формы из истории
 function fillFormFromHistory(params) {
     $('#rooms').val(params.rooms);
     $('#area').val(params.area);
@@ -423,4 +402,9 @@ function fillFormFromHistory(params) {
     if (params.region) {
         $('#region').val(params.region);
     }
+
+    // Прокручиваем к форме
+    $('html, body').animate({
+        scrollTop: $('#predictionForm').offset().top - 20
+    }, 200);
 }

@@ -26,9 +26,9 @@
         <div class="d-flex gap-2">
             {% if user.is_authenticated %}
             <!-- Показываем для авторизованных -->
-            <button class="btn" id="history" href="{% url 'history' %}">
+            <a class="btn" id="history" href="{% url 'history' %}">
                     <i class="bi bi-clock-history" style="font-size: 2rem; color: #0d6efd;"></i>
-            </button>
+            </a>
             <div class="dropdown">
                 <button class="btn" id="profileDropdown" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle" style="font-size: 2rem; color: #0d6efd;"></i>

@@ -5,6 +5,7 @@ from django.contrib.auth.views import LogoutView
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
+from .views import delete_history_item
 
 urlpatterns = [
     path('api/predict/', PredictAPIView.as_view(), name='predict'),
@@ -14,4 +15,5 @@ urlpatterns = [
     path('api/drf-auth/register_list/', views.RegisterView.as_view(), name='register'),
     path('api/drf-auth/logout/', LogoutView.as_view(), name='logout'),
     path('history/', FullHistoryView.as_view(), name='history'),
+    path('api/history/<int:item_id>/delete/', delete_history_item, name='delete_history_item'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

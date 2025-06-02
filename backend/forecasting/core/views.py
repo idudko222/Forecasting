@@ -119,3 +119,17 @@ class FullHistoryView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return SearchHistory.objects.filter(user=self.request.user).order_by('-created_at')
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["DELETE"])
+def delete_history_item(request, item_id):
+    try:
+        item = SearchHistory.objects.get(id=item_id, user=request.user)
+        item.delete()
+        return JsonResponse({'status': 'success'})
+    except SearchHistory.DoesNotExist:
+        return JsonResponse({'error': 'Record not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
