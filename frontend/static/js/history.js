@@ -78,3 +78,42 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+$(document).on('click', '.favorite-btn', function () {
+    const button = $(this);
+    const itemId = button.data('id');
+    const currentFavorite = button.data('favorite') === 'True';
+
+    $.ajax({
+        url: `/toggle_favorite/${itemId}/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({is_favorite: !currentFavorite}),
+        success: function (data) {
+            if (data.success) {
+                // Обновляем и данные jQuery, и DOM-атрибут
+                button.data('favorite', data.is_favorite);
+                button.attr('data-favorite', data.is_favorite); // Ключевое исправление!
+                console.log('Текущее значение:', currentFavorite, 'Новое значение:', !currentFavorite);
+                console.log('Ответ сервера:', data);
+
+                const starIcon = button.find('i');
+                if (data.is_favorite) {
+                    starIcon.removeClass('bi-star').addClass('bi-star-fill');
+                } else {
+                    starIcon.removeClass('bi-star-fill').addClass('bi-star');
+                }
+
+                // Перемещаем элемент (если нужно)
+                const itemRow = button.closest('tr');
+                itemRow.prependTo(itemRow.parent());
+            }
+        },
+        error: function (xhr) {
+            console.error("Ошибка при обновлении избранного:", xhr.responseText);
+        }
+    });
+});

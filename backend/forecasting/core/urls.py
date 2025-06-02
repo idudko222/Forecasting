@@ -16,4 +16,5 @@ urlpatterns = [
     path('api/drf-auth/logout/', LogoutView.as_view(), name='logout'),
     path('history/', FullHistoryView.as_view(), name='history'),
     path('api/history/<int:item_id>/delete/', delete_history_item, name='delete_history_item'),
+    path('toggle_favorite/<int:item_id>/', views.toggle_favorite, name='toggle_favorite'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

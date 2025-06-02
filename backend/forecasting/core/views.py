@@ -1,4 +1,4 @@
-import joblib
+import joblib, json
 import pandas as pd
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +11,7 @@ from .forms import CustomRegisterForm
 from .models import SearchHistory
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Загрузка моделей один раз при старте приложения
@@ -133,3 +134,31 @@ def delete_history_item(request, item_id):
         return JsonResponse({'error': 'Record not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def toggle_favorite(request, item_id):
+    if request.method == 'POST':
+        try:
+            # 1. Проверяем, что запись принадлежит текущему пользователю
+            item = SearchHistory.objects.get(id=item_id, user=request.user)
+
+            # 2. Получаем текущее состояние is_favorite из БД
+            current_state = item.is_favorite
+
+            # 3. Инвертируем состояние
+            item.is_favorite = not current_state
+            item.save()
+
+            return JsonResponse(
+                {
+                    'success': True,
+                    'is_favorite': item.is_favorite
+                }
+            )
+
+        except SearchHistory.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Record not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)

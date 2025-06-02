@@ -48,8 +48,16 @@
                 </td>
                 <td class="fw-bold" id="price-{{ item.id }}" data-price="{{ item.result|floatformat:'0' }}"></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-danger delete-history" data-id="{{ item.id }}">
+                    <button class="btn btn-lg btn-outline-danger delete-history" data-id="{{ item.id }}">
                         <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-lg btn-outline-warning favorite-btn" data-id="{{ item.id }}"
+                            data-favorite="{{ item.is_favorite }}">
+                        {% if item.is_favorite %}
+                        <i class="bi bi-star-fill"></i>
+                        {% else %}
+                        <i class="bi bi-star"></i>
+                        {% endif %}
                     </button>
                 </td>
             </tr>

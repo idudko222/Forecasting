@@ -25,3 +25,17 @@
     transform: scale(1.1);
     color: white !important;
 }
+
+.favorite-btn i.bi-star-fill {
+  color: #ffc107;
+}
+
+
+.favorite-btn i.bi-star {
+  color: #6c757d;
+}
+
+.favorite-btn:hover {
+    background-color: rgba(243, 193, 13, 0.8);
+    transform: scale(1.1);
+}
