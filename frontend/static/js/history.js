@@ -110,7 +110,7 @@ $(document).ready(function () {
     });
 });
 
-$(document).on('click', '.favorite-btn', function () {
+$(document).on('click', '.favorite-btn', function() {
     const button = $(this);
     const itemId = button.data('id');
     const currentFavorite = button.data('favorite') === 'True';
@@ -123,25 +123,13 @@ $(document).on('click', '.favorite-btn', function () {
             'Content-Type': 'application/json'
         },
         data: JSON.stringify({is_favorite: !currentFavorite}),
-        success: function (data) {
+        success: function(data) {
             if (data.success) {
+                // Обновляем данные кнопки
                 button.data('favorite', data.is_favorite);
                 button.attr('data-favorite', data.is_favorite);
 
-                // Обновляем классы кнопки
-                if (data.is_favorite) {
-                    button.removeClass('btn-outline-secondary').addClass('btn-outline-warning');
-                    button.find('i').removeClass('bi-star').addClass('bi-star-fill');
-                } else {
-                    button.removeClass('btn-outline-warning').addClass('btn-outline-secondary');
-                    button.find('i').removeClass('bi-star-fill').addClass('bi-star');
-                }
-                // Обновляем и данные jQuery, и DOM-атрибут
-                button.data('favorite', data.is_favorite);
-                button.attr('data-favorite', data.is_favorite); // Ключевое исправление!
-                console.log('Текущее значение:', currentFavorite, 'Новое значение:', !currentFavorite);
-                console.log('Ответ сервера:', data);
-
+                // Меняем только иконку
                 const starIcon = button.find('i');
                 if (data.is_favorite) {
                     starIcon.removeClass('bi-star').addClass('bi-star-fill');
@@ -149,12 +137,14 @@ $(document).on('click', '.favorite-btn', function () {
                     starIcon.removeClass('bi-star-fill').addClass('bi-star');
                 }
 
-                // Перемещаем элемент (если нужно)
-                const itemRow = button.closest('tr');
-                itemRow.prependTo(itemRow.parent());
+                // Сортировка и фильтрация
+                sortFavoritesFirst();
+                if ($('#showFavoritesOnly').is(':checked')) {
+                    filterFavoritesOnly(true);
+                }
             }
         },
-        error: function (xhr) {
+        error: function(xhr) {
             console.error("Ошибка при обновлении избранного:", xhr.responseText);
         }
     });
