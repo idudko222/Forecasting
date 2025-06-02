@@ -205,7 +205,7 @@ function loadHistory() {
             const lastFiveItems = data.slice(0, 3);
 
             if (lastFiveItems.length === 0) {
-                container.append('<div class="text-muted">История запросов пуста</div>');
+                container.append('<div class="text-muted" style="margin-bottom: 60px; padding-top: 30px; text-align: center">История запросов пуста</div>');
                 return;
             }
 

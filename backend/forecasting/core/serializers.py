@@ -9,7 +9,7 @@ class PredictionInputSerializer(serializers.Serializer):
     levels = serializers.IntegerField(min_value=1)
     rooms = serializers.IntegerField(min_value=1)
     area = serializers.FloatField(min_value=10)
-    kitchen_area = serializers.FloatField(min_value=6)
+    kitchen_area = serializers.FloatField(min_value=5)
     object_type = serializers.IntegerField(min_value=1, max_value=2)
     year = serializers.IntegerField(min_value=2000)
     month = serializers.IntegerField(min_value=1, max_value=12)

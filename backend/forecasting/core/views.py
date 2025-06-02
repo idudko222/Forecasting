@@ -14,7 +14,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 import math
 
-
 # Загрузка моделей один раз при старте приложения
 model = joblib.load('core/ml/model.pkl')
 encoder = joblib.load('core/ml/encoder.pkl')
@@ -113,6 +112,7 @@ class RegisterView(CreateView):
         login(self.request, self.object)  # Автоматический вход
         return response
 
+
 class FullHistoryView(LoginRequiredMixin, ListView):
     model = SearchHistory
     template_name = 'html/history.html'
@@ -122,8 +122,10 @@ class FullHistoryView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return SearchHistory.objects.filter(user=self.request.user).order_by('-created_at')
 
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+
 
 @require_http_methods(["DELETE"])
 def delete_history_item(request, item_id):
@@ -135,6 +137,7 @@ def delete_history_item(request, item_id):
         return JsonResponse({'error': 'Record not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @csrf_exempt
 def toggle_favorite(request, item_id):

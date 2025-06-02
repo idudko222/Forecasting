@@ -27,7 +27,7 @@
             {% if user.is_authenticated %}
             <!-- Показываем для авторизованных -->
             <a class="btn" id="history" href="{% url 'history' %}">
-                    <i class="bi bi-clock-history" style="font-size: 2rem; color: #0d6efd;"></i>
+                <i class="bi bi-clock-history" style="font-size: 2rem; color: #0d6efd;"></i>
             </a>
             <div class="dropdown">
                 <button class="btn" id="profileDropdown" data-bs-toggle="dropdown">
@@ -103,7 +103,9 @@
             </div>
             <div class="col-md-4">
                 <label for="kitchen_area" class="form-label">Площадь кухни (м²)</label>
-                <input type="number" class="form-control" id="kitchen_area" step="0.1" required>
+                <input type="number" class="form-control" id="kitchen_area"
+                       min="5" step="0.1" required
+                       placeholder="Минимум 5 м²">
             </div>
             <div class="col-md-4">
                 <label for="level" class="form-label">Этаж</label>
@@ -117,7 +119,7 @@
                 <label for="object_type" class="form-label">Тип объекта</label>
                 <select class="form-select" id="object_type" required>
                     <option value="1">Новостройка</option>
-                    <option value="2">Вторичка</option>
+                    <option value="2" selected>Вторичка</option>
                 </select>
             </div>
             <script>
@@ -147,14 +149,25 @@
                 <div class="invalid-feedback" id="submitError"></div>
             </div>
             {% if user.is_authenticated %}
+            <!-- Блоки истории и результатов в одной строке -->
+            <div class="col-md-8" style="margin-bottom: 20px">
+                <div id="result" class="card md-light rounded">
+                    <div class="card-header">
+                        <h5 style="margin-bottom: .1rem;">Результат оценки</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="display-4" id="price">-</div>
+                        <div class="text-muted mt-2">Среднерыночная стоимость</div>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-4">
                 <div class="card history-card">
                     <div class="card-header">
-                        <h5>История запросов (последние 3)</h5>
+                        <h5 style="margin-bottom: .1rem;">История запросов (последние 3)</h5>
                     </div>
                     <div class="card-body">
                         <div id="historyList">
-                            <!-- Здесь будет загружаться история -->
                             <div class="text-muted">Загрузка истории...</div>
                         </div>
                     </div>
@@ -163,11 +176,6 @@
             {% endif %}
         </div>
     </form>
-
-    <div id="result" class="mt-4 p-3 bg-light rounded d-none">
-        <h3>Предсказанная стоимость:</h3>
-        <div class="display-4" id="price">-</div>
-    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
