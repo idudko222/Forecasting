@@ -27,13 +27,13 @@
 }
 
 .favorite-btn i.bi-star-fill {
-  color: #ffc107;
+    color: #ffc107;
     outline-color: black;
 }
 
 
 .favorite-btn i.bi-star {
-  color: #6c757d;
+    color: #6c757d;
 }
 
 .favorite-btn:hover {
@@ -43,4 +43,16 @@
 
 .form-switch {
     padding-top: 25px;
+}
+
+.table-history tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.table-history {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
