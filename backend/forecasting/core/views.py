@@ -1,3 +1,4 @@
+from datetime import datetime
 import joblib, json
 import pandas as pd
 from rest_framework.views import APIView
@@ -13,11 +14,15 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 import math
+from .pdf_utils import generate_report_pdf
+from django.http import HttpResponse
+import os
+from django.conf import settings
 
 # Загрузка моделей один раз при старте приложения
-model = joblib.load('core/ml/model.pkl')
-encoder = joblib.load('core/ml/encoder.pkl')
-scaler = joblib.load('core/ml/scaler.pkl')
+# model = joblib.load('core/ml/model.pkl')
+# encoder = joblib.load('core/ml/encoder.pkl')
+# scaler = joblib.load('core/ml/scaler.pkl')
 
 
 class PredictAPIView(APIView):
@@ -166,3 +171,28 @@ def toggle_favorite(request, item_id):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def generate_report(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Требуется авторизация'}, status=403)
+
+    try:
+        item_ids = json.loads(request.body).get('items', [])
+        items = SearchHistory.objects.filter(id__in=item_ids, user=request.user)
+
+        if not items.exists():
+            return JsonResponse({'error': 'Не найдены выбранные записи'}, status=404)
+
+        # Генерация PDF
+        pdf_buffer = generate_report_pdf(request.user, items)
+
+        # Создаем HttpResponse с PDF
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="report_{request.user.id}.pdf"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

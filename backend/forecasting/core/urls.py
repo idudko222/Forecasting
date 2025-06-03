@@ -5,7 +5,7 @@ from django.contrib.auth.views import LogoutView
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import delete_history_item
+from .views import delete_history_item, generate_report
 
 urlpatterns = [
     path('api/predict/', PredictAPIView.as_view(), name='predict'),
@@ -17,4 +17,5 @@ urlpatterns = [
     path('history/', FullHistoryView.as_view(), name='history'),
     path('api/history/<int:item_id>/delete/', delete_history_item, name='delete_history_item'),
     path('toggle_favorite/<int:item_id>/', views.toggle_favorite, name='toggle_favorite'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path('generate_report/', generate_report, name='generate_report'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

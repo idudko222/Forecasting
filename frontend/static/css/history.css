@@ -56,3 +56,19 @@
     overflow: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.report-checkbox:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+#generateReportBtn {
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1000;
+    margin-top: 20px;
+}
+
+#generateReportBtn:disabled {
+    opacity: 0.5;
+}

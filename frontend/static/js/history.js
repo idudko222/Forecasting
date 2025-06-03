@@ -1,3 +1,5 @@
+let selectedItems = [];
+
 ymaps.ready(function () {
     console.log("ymaps.ready() вызван"); // Проверка, что API инициализировано
     $('tr[data-lat]').each(function () {
@@ -114,6 +116,8 @@ function filterFavoritesOnly(showOnlyFavorites) {
     if (showOnlyFavorites && !hasFavorites) {
         $('table tbody').append('<tr><td colspan="4" class="text-center py-4">Нет избранных записей</td></tr>');
     }
+
+    $('table tbody tr:hidden').find('.report-checkbox').prop('checked', false).trigger('change');
 }
 
 // Инициализация при загрузке страницы
@@ -129,7 +133,7 @@ $(document).ready(function () {
     });
 });
 
-$(document).on('click', '.favorite-btn', function() {
+$(document).on('click', '.favorite-btn', function () {
     const button = $(this);
     const itemId = button.data('id');
     const isCurrentlyFavorite = button.find('.bi-star-fill').length > 0;
@@ -143,7 +147,7 @@ $(document).on('click', '.favorite-btn', function() {
             'Content-Type': 'application/json'
         },
         data: JSON.stringify({is_favorite: !isCurrentlyFavorite}),
-        success: function(data) {
+        success: function (data) {
             if (data.success) {
                 // Переключаем иконку
                 const starIcon = button.find('i');
@@ -164,8 +168,80 @@ $(document).on('click', '.favorite-btn', function() {
                 $('table tbody tr').filter(':contains("Нет избранных записей")').remove();
             }
         },
-        error: function(xhr) {
+        error: function (xhr) {
             console.error("Ошибка при обновлении избранного:", xhr.responseText);
         }
     });
 });
+
+$(document).on('change', '.report-checkbox', function () {
+    const itemId = $(this).data('id');
+    const isChecked = $(this).is(':checked');
+
+    if (isChecked) {
+        selectedItems.push(itemId);
+    } else {
+        selectedItems = selectedItems.filter(id => id !== itemId);
+    }
+
+    // Активируем/деактивируем кнопку
+    $('#generateReportBtn').prop('disabled', selectedItems.length === 0);
+});
+
+// Обработчик создания отчета
+$(document).on('click', '#generateReportBtn', function (e) {
+    e.preventDefault();
+
+    if (selectedItems.length === 0) {
+        console.log('Нет выбранных элементов для отчета');
+        return;
+    }
+
+    console.log('Кнопка нажата, выбранные элементы:', selectedItems);
+
+    // Показываем индикатор загрузки
+    const btn = $(this);
+    btn.prop('disabled', true);
+    btn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Генерация...');
+
+    // Отправка запроса на сервер
+    $.ajax({
+        url: '/generate_report/',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({items: selectedItems}),
+        xhrFields: {
+            responseType: 'blob' // Это важно для получения бинарных данных
+        },
+        success: function (data, status, xhr) {
+            // Создаем URL для blob
+            const blob = new Blob([data], {type: 'application/pdf'});
+            const url = window.URL.createObjectURL(blob);
+
+            // Создаем ссылку для скачивания
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'realty_report.pdf';
+            document.body.appendChild(link);
+            link.click();
+
+            // Очищаем
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        },
+        error: function (xhr) {
+            console.error('Ошибка:', xhr.responseText);
+            alert('Ошибка при генерации отчета: ' + xhr.responseText);
+        },
+        complete: function () {
+            btn.prop('disabled', false);
+            btn.html('<i class="bi bi-file-earmark-pdf"></i> Создать отчет');
+        }
+    });
+});
+
