@@ -3,6 +3,11 @@
     font-size: 14px;
 }
 
+.param-name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
 .table-history th {
     background-color: #f8f9fa;
     position: sticky;
@@ -30,7 +35,6 @@
     color: #ffc107;
     outline-color: black;
 }
-
 
 .favorite-btn i.bi-star {
     color: #6c757d;
@@ -71,4 +75,118 @@
 
 #generateReportBtn:disabled {
     opacity: 0.5;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .d-flex.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ms-auto.d-flex.align-items-center {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 15px;
+    }
+
+    #deselectAllBtn, #generateReportBtn {
+        margin: 5px 0;
+        width: 100%;
+    }
+
+    .form-switch {
+        padding-top: 10px;
+        margin-left: 0 !important;
+    }
+
+    .table-history th, .table-history td {
+        padding: 8px 5px;
+    }
+
+    .table-history td:nth-child(3) {
+        white-space: nowrap;
+    }
+
+    .params-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3px;
+    }
+
+    .param-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .param-name {
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .param-value {
+        font-size: 12px;
+    }
+
+    .table-history td:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .delete-history, .favorite-btn {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .page-item {
+        margin: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .params-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-history thead {
+        display: none;
+    }
+
+    .table-history tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .table-history td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .table-history td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .table-history td:last-child {
+        border-bottom: none;
+        justify-content: flex-end;
+    }
 }
