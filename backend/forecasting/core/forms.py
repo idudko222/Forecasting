@@ -28,3 +28,9 @@ class CustomRegisterForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise ValidationError("Пароли не совпадают")
         return password2
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Пользователь с таким email уже существует")
+        return email

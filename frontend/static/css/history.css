@@ -77,6 +77,16 @@
     opacity: 0.5;
 }
 
+.pagination {
+    flex-wrap: wrap;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    padding: 15px 0;
+}
+
 /* Мобильные стили */
 @media (max-width: 768px) {
     .container {
