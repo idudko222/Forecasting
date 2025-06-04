@@ -88,6 +88,33 @@
         </table>
     </div>
 </div>
+<div class="navigation" style="display: flex; justify-content: center">
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination">
+            {% if history_items.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ history_items.previous_page_number }}" aria-label="Предыдущая">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in history_items.paginator.page_range %}
+            <li class="page-item {% if history_items.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if history_items.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ history_items.next_page_number }}" aria-label="Следующая">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 
 <script>
     document.querySelectorAll('[id^="price-"]').forEach(function (el) {

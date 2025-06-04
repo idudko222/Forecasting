@@ -1,5 +1,3 @@
-let selectedItems = [];
-
 ymaps.ready(function () {
     console.log("ymaps.ready() вызван"); // Проверка, что API инициализировано
     $('tr[data-lat]').each(function () {
@@ -174,74 +172,112 @@ $(document).on('click', '.favorite-btn', function () {
     });
 });
 
-$(document).on('change', '.report-checkbox', function () {
-    const itemId = $(this).data('id');
-    const isChecked = $(this).is(':checked');
 
-    if (isChecked) {
-        selectedItems.push(itemId);
-    } else {
-        selectedItems = selectedItems.filter(id => id !== itemId);
+$(document).ready(function () {
+    // Ключ для хранения в sessionStorage
+    const STORAGE_KEY = 'selected_history_items';
+
+    // Восстановление выбранных элементов
+    function getSelectedIds() {
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
     }
 
-    // Активируем/деактивируем кнопку
-    $('#generateReportBtn').prop('disabled', selectedItems.length === 0);
-});
-
-// Обработчик создания отчета
-$(document).on('click', '#generateReportBtn', function (e) {
-    e.preventDefault();
-
-    if (selectedItems.length === 0) {
-        console.log('Нет выбранных элементов для отчета');
-        return;
+    // Сохранение выбранных элементов
+    function saveSelectedIds(ids) {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+        updateGenerateReportBtn();
     }
 
-    console.log('Кнопка нажата, выбранные элементы:', selectedItems);
+    // Обновление состояния кнопки "Создать отчет"
+    function updateGenerateReportBtn() {
+        const selectedIds = getSelectedIds();
+        $('#generateReportBtn').prop('disabled', selectedIds.length === 0);
+    }
 
-    // Показываем индикатор загрузки
-    const btn = $(this);
-    btn.prop('disabled', true);
-    btn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Генерация...');
+    // При загрузке страницы восстанавливаем выбранные элементы
+    const selectedIds = getSelectedIds();
+    selectedIds.forEach(id => {
+        $(`.report-checkbox[data-id="${id}"]`).prop('checked', true);
+    });
+    updateGenerateReportBtn();
 
-    // Отправка запроса на сервер
-    $.ajax({
-        url: '/generate_report/',
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        },
-        data: JSON.stringify({items: selectedItems}),
-        xhrFields: {
-            responseType: 'blob' // Это важно для получения бинарных данных
-        },
-        success: function (data, status, xhr) {
-            // Создаем URL для blob
-            const blob = new Blob([data], {type: 'application/pdf'});
-            const url = window.URL.createObjectURL(blob);
+    // Обработчик изменения чекбоксов
+    $(document).on('change', '.report-checkbox', function() {
+        const id = $(this).data('id');
+        let selectedIds = getSelectedIds();
 
-            // Создаем ссылку для скачивания
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'realty_report.pdf';
-            document.body.appendChild(link);
-            link.click();
-
-            // Очищаем
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-        },
-        error: function (xhr) {
-            console.error('Ошибка:', xhr.responseText);
-            alert('Ошибка при генерации отчета: ' + xhr.responseText);
-        },
-        complete: function () {
-            btn.prop('disabled', false);
-            btn.html('<i class="bi bi-file-earmark-pdf"></i> Создать отчет');
+        if ($(this).is(':checked')) {
+            if (!selectedIds.includes(id)) {
+                selectedIds.push(id);
+            }
+        } else {
+            selectedIds = selectedIds.filter(x => x !== id);
         }
+
+        saveSelectedIds(selectedIds);
+    });
+
+    // Обработчик создания отчета (обновленный)
+    $(document).on('click', '#generateReportBtn', function (e) {
+        e.preventDefault();
+        const selectedIds = getSelectedIds();
+
+        if (selectedIds.length === 0) {
+            console.log('Нет выбранных элементов для отчета');
+            return;
+        }
+
+        console.log('Кнопка нажата, выбранные элементы:', selectedIds);
+
+        // Показываем индикатор загрузки
+        const btn = $(this);
+        btn.prop('disabled', true);
+        btn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Генерация...');
+
+        // Отправка запроса на сервер
+        $.ajax({
+            url: '/generate_report/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({items: selectedIds}), // Используем selectedIds из sessionStorage
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (data) {
+                const blob = new Blob([data], {type: 'application/pdf'});
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'realty_report.pdf';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+            },
+            error: function (xhr) {
+                console.error('Ошибка:', xhr.responseText);
+                alert('Ошибка при генерации отчета: ' + xhr.responseText);
+            },
+            complete: function () {
+                btn.prop('disabled', false);
+                btn.html('<i class="bi bi-file-earmark-pdf"></i> Создать отчет');
+            }
+        });
+    });
+
+    // Инициализация сортировки и фильтрации
+    sortFavoritesFirst();
+    const showOnlyFavorites = $('#showFavoritesOnly').is(':checked');
+    filterFavoritesOnly(showOnlyFavorites);
+
+    // Обработчик переключателя
+    $('#showFavoritesOnly').change(function () {
+        filterFavoritesOnly(this.checked);
     });
 });
-

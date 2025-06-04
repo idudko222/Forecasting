@@ -48,6 +48,11 @@ INSTALLED_APPS = [
     'forecasting',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
+}
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 LOGOUT_REDIRECT_URL = 'index'  # Имя URL, куда перенаправлять после выхода

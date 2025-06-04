@@ -1,6 +1,6 @@
-from datetime import datetime
 import joblib, json
 import pandas as pd
+from django.core.paginator import Paginator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,8 +16,9 @@ from django.views.decorators.csrf import csrf_exempt
 import math
 from .pdf_utils import generate_report_pdf
 from django.http import HttpResponse
-import os
-from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
 
 # Загрузка моделей один раз при старте приложения
 # model = joblib.load('core/ml/model.pkl')
@@ -90,17 +91,6 @@ class PredictAPIView(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    def get_building_type(self, type_id):
-        types = {
-            0: 'Другой',
-            1: 'Панельный',
-            2: 'Монолитный',
-            3: 'Кирпичный',
-            4: 'Блочный',
-            5: 'Деревянный'
-        }
-        return types.get(type_id, 'Неизвестно')
-
 
 class CustomView(LoginView):
     template_name = 'html/login.html'
@@ -122,14 +112,18 @@ class FullHistoryView(LoginRequiredMixin, ListView):
     model = SearchHistory
     template_name = 'html/history.html'
     context_object_name = 'history_items'
-    paginate_by = 20  # Пагинация по 20 элементов
+    paginate_by = 10
 
     def get_queryset(self):
         return SearchHistory.objects.filter(user=self.request.user).order_by('-created_at')
 
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page = self.request.GET.get('page')
+        paginator = Paginator(self.get_queryset(), self.paginate_by)
+        history_items = paginator.get_page(page)
+        context['history_items'] = history_items
+        return context
 
 
 @require_http_methods(["DELETE"])
