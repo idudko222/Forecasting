@@ -218,6 +218,12 @@ $(document).ready(function () {
         saveSelectedIds(selectedIds);
     });
 
+    $(document).on('click', '#deselectAllBtn', function() {
+         $('.report-checkbox').prop('checked', false).trigger('change');
+         sessionStorage.removeItem(STORAGE_KEY);
+         updateGenerateReportBtn();
+    });
+
     // Обработчик создания отчета (обновленный)
     $(document).on('click', '#generateReportBtn', function (e) {
         e.preventDefault();
@@ -248,6 +254,11 @@ $(document).ready(function () {
                 responseType: 'blob'
             },
             success: function (data) {
+                // Сброс выделения после успешной генерации
+                $('.report-checkbox').prop('checked', false);
+                sessionStorage.removeItem(STORAGE_KEY);
+
+                // Скачивание файла
                 const blob = new Blob([data], {type: 'application/pdf'});
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
