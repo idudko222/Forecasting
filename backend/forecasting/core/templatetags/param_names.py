@@ -16,6 +16,7 @@ def translate_param(key):
         'geo_lat': 'Широта',
         'geo_lon': 'Долгота',
         'year': 'Год',
-        'month': 'Месяц'
+        'month': 'Месяц',
+        'address': 'Адрес',
     }
     return translations.get(key, key)

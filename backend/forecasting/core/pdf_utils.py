@@ -1,3 +1,4 @@
+import math
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -52,13 +53,14 @@ def generate_report_pdf(user, items):
                 f"Кухня: {item.search_data.get('kitchen_area', 'N/A')} м²",
                 f"Этаж: {item.search_data.get('level', 'N/A')}/{item.search_data.get('levels', 'N/A')}",
                 f"Тип: {get_building_type(item.search_data.get('building_type', 0))}",
-                f"Объект: {'Новостройка' if item.search_data.get('object_type') == 1 else 'Вторичка'}"
+                f"Объект: {'Новостройка' if item.search_data.get('object_type') == 1 else 'Вторичка'}",
+                f"Адрес: {item.search_data.get('address', 'N/A')}"
             ]
             data.append(
                 [
                     item.created_at.strftime("%d.%m.%Y %H:%M"),
                     "\n".join(params),
-                    f"{int(item.result):n} ₽"
+                    f"{math.ceil(int(item.result / 50000)) * 50000} ₽"
                 ]
             )
 
@@ -67,16 +69,18 @@ def generate_report_pdf(user, items):
         table.setStyle(
             TableStyle(
                 [
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0d6efd')),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#333333')),  # Темно-серый для заголовка
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Arial-Bold'),  # Заголовки таблицы
-                    ('FONTNAME', (0, 1), (-1, -1), 'Arial'),  # Основной текст таблицы
-                    ('FONTSIZE', (0, 0), (-1, -1), 10),
-                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8f9fa')),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#dee2e6')),
                     ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Arial-Bold'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Arial'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),  # Светло-серый для строк
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),  # Тонкие черные границы
+                    ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 4),
                 ]
             )
         )

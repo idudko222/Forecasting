@@ -89,6 +89,19 @@ const supportedRegions = [
     'Ненецкий автономный округ'
 ];
 
+function updateAddress(coords){
+    $('#geo_lat').val(coords[0]);
+    $('#geo_lon').val(coords[1]);
+
+    ymaps.geocode(coords).then(function (res) {
+        const geoObject = res.geoObjects.get(0);
+        if (!geoObject) return;
+
+        const address = res.geoObjects.get(0).getAddressLine()
+        $('#address').val(address).attr('value', address);
+
+    });
+}
 
 function updateCoordinatesAndRegion(coords) {
     $('#geo_lat').val(coords[0]);
@@ -142,6 +155,7 @@ function initMap() {
         placemark.events.add('dragend', function () {
             const coords = placemark.geometry.getCoordinates();
             updateCoordinatesAndRegion(coords);
+            updateAddress(coords);
         });
 
         // Обработчик клика по карте
@@ -149,6 +163,7 @@ function initMap() {
             const coords = e.get('coords');
             placemark.geometry.setCoordinates(coords);
             updateCoordinatesAndRegion(coords);
+            updateAddress(coords);
         });
     });
 }
@@ -323,7 +338,8 @@ $(document).ready(function () {
             kitchen_area: parseFloat($('#kitchen_area').val()),
             object_type: parseInt($('#object_type').val()),
             year: parseInt($('#year').val()),
-            month: parseInt($('#month').val())
+            month: parseInt($('#month').val()),
+            address: ($('#address').val()),
         };
 
         function getCookie(name) {

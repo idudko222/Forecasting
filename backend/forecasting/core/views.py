@@ -1,15 +1,6 @@
-from email.policy import default
 import joblib, json
 import pandas as pd
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from jwt.utils import force_bytes
-from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -59,7 +50,7 @@ class PredictAPIView(APIView):
             scaled = scaler.transform(encoded)
 
             # 5. Предсказание
-            price = model.predict(scaled)[0]
+            price = math.ceil(int(model.predict(scaled)[0] / 50000)) * 50000
 
             if request.user.is_authenticated:
                 SearchHistory.objects.create(
@@ -94,6 +85,7 @@ class PredictAPIView(APIView):
                 'region': item.search_data.get('region'),
                 'geo_lat': item.search_data.get('geo_lat'),
                 'geo_lon': item.search_data.get('geo_lon'),
+                'address': item.search_data.get('address'),
             },
             'result': item.result,
             'date': item.created_at.strftime("%d.%m.%Y %H:%M")
