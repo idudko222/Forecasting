@@ -11,7 +11,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 
-
 def get_building_type(type_id):
     types = {
         0: 'Другой',
@@ -33,16 +32,20 @@ def generate_report_pdf(user, items):
     try:
         # Регистрируем шрифты
         pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
-        pdfmetrics.registerFont(TTFont('Arial-Bold', 'arialbd.ttf'))  # Полужирный вариант
+        pdfmetrics.registerFont(TTFont('Arial-Bold', 'arialbd.ttf'))
 
         p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
 
-        # 1. Заголовок отчета
-        p.setFont("Arial-Bold", 16)
-        p.drawString(1 * inch, 10.5 * inch, "Отчет по истории поисков недвижимости")
-        p.setFont("Arial", 12)
-        p.drawString(1 * inch, 10.2 * inch, f"Пользователь: {user.username}")
-        p.drawString(1 * inch, 9.9 * inch, f"Дата формирования: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+        # 1. Заголовок отчета (на каждой странице)
+        def draw_header():
+            p.setFont("Arial-Bold", 16)
+            p.drawString(1 * inch, height - 1 * inch, "Отчет по истории поисков недвижимости")
+            p.setFont("Arial", 12)
+            p.drawString(1 * inch, height - 1.3 * inch, f"Пользователь: {user.username}")
+            p.drawString(
+                1 * inch, height - 1.6 * inch, f"Дата формирования: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+                )
 
         # 2. Подготовка данных таблицы
         data = [["Дата", "Параметры", "Результат"]]
@@ -64,36 +67,76 @@ def generate_report_pdf(user, items):
                 ]
             )
 
-        # 3. Создание и настройка таблицы
-        table = Table(data, colWidths=[1.2 * inch, 4 * inch, 1.5 * inch])
-        table.setStyle(
-            TableStyle(
-                [
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#333333')),  # Темно-серый для заголовка
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Arial-Bold'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Arial'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 10),
-                    ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),  # Светло-серый для строк
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),  # Тонкие черные границы
-                    ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ]
+        # 3. Настройки таблицы
+        col_widths = [1.2 * inch, 4 * inch, 1.5 * inch]
+        row_height = 0.25 * inch
+        header_rows = 1
+        margin = 1 * inch
+        available_height = height - 2.5 * inch  # Учитываем заголовок и подпись
+
+        # 4. Разбиение данных на страницы
+        current_row = 0
+        total_rows = len(data)
+
+        while current_row < total_rows:
+            # Рисуем заголовок страницы
+            draw_header()
+
+            # Рассчитываем сколько строк поместится на текущей странице
+            remaining_space = available_height
+            rows_on_page = 0
+
+            # Проверяем сколько строк поместится
+            for i in range(current_row, total_rows):
+                # Оцениваем высоту строки (базовая высота + дополнительные строки в параметрах)
+                param_lines = len(data[i][1].split('\n')) if i > 0 else 1
+                needed_height = max(1, param_lines - 3) * row_height + row_height
+
+                if remaining_space - needed_height < 0:
+                    break
+                remaining_space -= needed_height
+                rows_on_page += 1
+
+            if rows_on_page == 0:
+                rows_on_page = 1  # Хотя бы одна строка
+
+            # Создаем таблицу для текущей страницы
+            page_data = data[:header_rows] + data[current_row:current_row + rows_on_page]
+            table = Table(page_data, colWidths=col_widths)
+
+            # Стиль таблицы
+            table.setStyle(
+                TableStyle(
+                    [
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#333333')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Arial-Bold'),
+                        ('FONTNAME', (0, 1), (-1, -1), 'Arial'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 10),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#f0f0f0'), colors.white]),
+                    ]
+                )
             )
-        )
 
-        # 4. Рендеринг таблицы
-        table.wrapOn(p, 7 * inch, 6 * inch)
-        table.drawOn(p, 1 * inch, 6 * inch)
+            # Рендерим таблицу
+            table.wrapOn(p, width - 2 * margin, height)
+            table.drawOn(p, margin, height - 2.5 * inch - (available_height - remaining_space))
 
-        # 5. Подпись
-        p.setFont("Arial", 8)
-        p.drawString(1 * inch, 0.5 * inch, "Сгенерировано автоматически в системе оценки недвижимости")
+            # Подпись на каждой странице
+            p.setFont("Arial", 8)
+            p.drawString(margin, 0.5 * inch, "Сгенерировано автоматически в системе оценки недвижимости")
 
-        p.showPage()
+            current_row += rows_on_page
+            if current_row < total_rows:
+                p.showPage()
+
         p.save()
         buffer.seek(0)
         return buffer
