@@ -23,18 +23,23 @@ class SearchHistory(models.Model):
             f"{data.get('building_type', '?')}, {self.result}₽"
         )
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(unique=True, blank=False, null=False)
-
-    def __str__(self):
-        return f'Профиль {self.user}'
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+# class Profile(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     email = models.EmailField(unique=True, blank=False, null=False)
+#
+#     def save(self, *args, **kwargs):
+#         if not self.email:
+#             self.email = self.user.email
+#             super().save(*args, **kwargs)
+#
+#     def __str__(self):
+#         return f'Профиль {self.user}'
+#
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Profile.objects.create(user=instance, email=instance.email)
+#
+# @receiver(post_save, sender=User)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.profile.save()

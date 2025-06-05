@@ -32,7 +32,18 @@ SECRET_KEY = 'django-insecure-oamo7chdwvyr_@elwv_ycep2=5zydcd#oao_#29yt@79d*1=oi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'  # или другой SMTP-сервер
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'idudko222@yandex.ru'
+#EMAIL_HOST_PASSWORD = 'uwzkrrvgryeafeed'
+EMAIL_HOST_PASSWORD = 'kjkwwlqawthjsknn'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
 
 # Application definition
 
